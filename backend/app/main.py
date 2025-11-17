@@ -85,3 +85,21 @@ class GenreRecommendationSystem:
         model.save(self.model_path)
         print("New Word2Vec model trained and saved.")
         return model
+    def genre_vector(self, genre_text):
+        """Converts genre text into numerical vector using Word2Vec."""
+        words = self.word_tokenize(genre_text)
+        vectors = [self.word2vec_model.wv[word] for word in words if word in self.word2vec_model.wv]
+        return np.mean(vectors, axis=0) if vectors else np.zeros(100)
+
+    def find_movie(self, movie_title: str) -> Union[None, pd.Series]:
+        """Finds movie using fuzzy matching."""
+        best_match = process.extractOne(movie_title, self.movies_df["title"].tolist(), score_cutoff=80)
+        if best_match:
+            return self.movies_df[self.movies_df["title"] == best_match[0]].iloc[0]
+        return None
+
+    def recommend_music(self, movie_title, num_recommendations=5):
+        """Recommends music tracks based on movie genres."""
+        idx = self.movies_df[self.movies_df["title"].str.lower() == movie_title.lower()].index
+        if len(idx) == 0:
+            return "Movie not found!"
