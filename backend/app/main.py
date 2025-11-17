@@ -65,3 +65,23 @@ class GenreRecommendationSystem:
             return " ".join(genres_list)
         except:
             return ""
+    def word_tokenize(self, text):
+        """Tokenizes input text using SpaCy."""
+        doc = self.nlp(text)
+        tokens = [token.lemma_.lower() for token in doc if not token.is_stop and not token.is_punct]
+        return tokens
+
+    def load_or_train_model(self):
+        """Loads existing Word2Vec model or trains new one."""
+        if os.path.exists(self.model_path):
+            print("Loaded existing Word2Vec model.")
+            return Word2Vec.load(self.model_path)
+        
+        print("Training new Word2Vec model...")
+        all_genres = self.movies_df["processed_genres"].tolist() + self.music_df["processed_genres"].tolist()
+        tokenized_genres = [self.word_tokenize(genres) for genres in all_genres]
+
+        model = Word2Vec(sentences=tokenized_genres, vector_size=100, window=5, min_count=1, workers=4)
+        model.save(self.model_path)
+        print("New Word2Vec model trained and saved.")
+        return model
