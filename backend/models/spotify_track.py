@@ -4,8 +4,6 @@ class SpotifyTrack:
     def __init__(self, name, artist, album_image=None, spotify_url=None):
         self.name = name
         self.artist = artist
-        self.album_image = album_image
-        self.spotify_url = spotify_url
 
 
 #  convert Spotify API track JSON into a SpotifyTrack object.
@@ -26,4 +24,4 @@ class SpotifyTrack:
             return None
 
 				# construct and return SpotifyTrack instance
-        return cls(name=name, artist=artist, album_image=album_image, spotify_url=spotify_url)
+        return cls(name=name, artist=artist)
