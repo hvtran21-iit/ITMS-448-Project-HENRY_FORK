@@ -1,9 +1,15 @@
 import requests
 import os
+from pathlib import Path
+from dotenv import load_dotenv
+
+# Load .env from repo root
+env_path = Path(__file__).resolve().parent.parent.parent / ".env"
+load_dotenv(dotenv_path=env_path)
 
 class TMDBClient:
     BASE_URL = "https://api.themoviedb.org/3"
-
+# retrieve API key from .env and check validity
     def __init__(self):
         self.api_key = os.getenv("TMDB_API_KEY")
         if not self.api_key:
@@ -14,19 +20,19 @@ class TMDBClient:
             params = {}
         params["api_key"] = self.api_key
         url = f"{self.BASE_URL}{endpoint}"
-        return requests.get(url, params=params).json()
-
+        response = requests.get(url, params=params)
+        response.raise_for_status()
+        return response.json()
+#pull genres 
     def get_genre_id(self, genre_name):
-        """Return the TMDB numeric genre ID for a given genre string."""
         data = self._get("/genre/movie/list")
         genres = data.get("genres", [])
         for g in genres:
             if genre_name.lower() in g["name"].lower():
                 return g["id"]
         return None
-
+#pull movies by genre 
     def search_movies_by_genre(self, genre_name, limit=10):
-        """Return a list of movies that match a genre name."""
         genre_id = self.get_genre_id(genre_name)
         if not genre_id:
             return []
@@ -38,6 +44,5 @@ class TMDBClient:
         return data.get("results", [])[:limit]
 
     def search_movie_by_title(self, title):
-        """Optional: search TMDB by movie title."""
         data = self._get("/search/movie", {"query": title})
         return data.get("results", [])
