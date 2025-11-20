@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Spottest - Home</title>
+  <title>Spottest - Your Recommendations</title>
   <style>
     body {
       margin: 0;
@@ -88,11 +88,17 @@
       background: #111;
       border-radius: 15px;
       padding: 12px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .card:hover {
+      transform: scale(1.05);
     }
 
     .card img {
       width: 100%;
-      height: 150px;
+      height: 220px;
       object-fit: cover;
       border-radius: 12px;
     }
@@ -106,6 +112,7 @@
     .movie-desc {
       font-size: 13px;
       opacity: 0.7;
+      margin-top: 5px;
     }
 
     .show-all {
@@ -125,6 +132,28 @@
       cursor: pointer;
       border: none;
     }
+
+    .debug-section {
+      background: #111;
+      margin: 40px;
+      padding: 20px;
+      border-radius: 15px;
+      font-size: 14px;
+    }
+
+    .debug-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1db954;
+      margin-bottom: 15px;
+    }
+
+    .track-item {
+      padding: 10px;
+      margin: 5px 0;
+      background: #222;
+      border-radius: 8px;
+    }
   </style>
 </head>
 <body>
@@ -134,53 +163,67 @@
     <input type="text" class="search" placeholder="Search Movies or Songs" />
   </div>
 
-  <button class="reroll">🔄 Re-Roll Recommendations</button>
+  <button class="reroll" onclick="window.location.href='/login'">🔄 Re-Roll Recommendations</button>
 
-  <div class="topic-section-title subtitle-green">Movies by Topics</div>
-
-  <div id="topicsContainer"></div>
-
-<script>
-const exampleMovies = [
-  { title: 'Movie 1', desc: 'Movie Description 1', img: 'https://placehold.co/300x300' },
-  { title: 'Movie 2', desc: 'Movie Description 2', img: 'https://placehold.co/300x300' },
-  { title: 'Movie 3', desc: 'Movie Description 3', img: 'https://placehold.co/300x300' },
-  { title: 'Movie 4', desc: 'Movie Description 4', img: 'https://placehold.co/300x300' },
-  { title: 'Movie 5', desc: 'Movie Description 5', img: 'https://placehold.co/300x300' },
-  { title: 'Movie 6', desc: 'Movie Description 6', img: 'https://placehold.co/300x300' },
-  { title: 'Movie 7', desc: 'Movie Description 7', img: 'https://placehold.co/300x300' },
-  { title: 'Movie 8', desc: 'Movie Description 8', img: 'https://placehold.co/300x300' }
-];
-
-const topics = ['TOPIC 1', 'TOPIC 2', 'TOPIC 3', 'TOPIC 4'];
-
-function createTopic(topicName) {
-  const container = document.createElement('div');
-
-  container.innerHTML = `
-    <div class="section-header">
-      <div class="topic-title">${topicName}</div>
-      <div class="show-all">Show all →</div>
+  <!-- Recent Tracks Section (Optional Debug) -->
+  {% if tracks %}
+  <div class="debug-section">
+    <div class="debug-title">Your Recent Spotify Tracks</div>
+    {% for track in tracks %}
+    <div class="track-item">
+      <strong>{{ track.name }}</strong> by {{ track.artists[0].name }}
     </div>
-    <div class="scroll-row">${exampleMovies
-      .map(
-        m => `
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- TasteDive Debug Info (Optional) -->
+  {% if td_debug %}
+  <div class="debug-section">
+    <div class="debug-title">TasteDive API Response</div>
+    <pre style="overflow-x: auto;">{{ td_debug }}</pre>
+  </div>
+  {% endif %}
+
+  <!-- Movie Recommendations -->
+  <div class="topic-section-title subtitle-green">Movies Based on Your Music Taste</div>
+
+  <div class="scroll-row">
+    {% if recommendations %}
+      {% for movie in recommendations %}
       <div class="card">
-        <img src="${m.img}" />
-        <div class="movie-title">${m.title}</div>
-        <div class="movie-desc">${m.desc}</div>
-      </div>`
-      )
-      .join('')}
+        <img src="{{ movie.poster if movie.poster else 'https://placehold.co/300x400/1db954/ffffff?text=' + movie.title }}" 
+             alt="{{ movie.title }}" 
+             onerror="this.src='https://placehold.co/300x400/1db954/ffffff?text=No+Image'" />
+        <div class="movie-title">{{ movie.title }}</div>
+        {% if movie.description %}
+        <div class="movie-desc">{{ movie.description[:100] }}...</div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    {% else %}
+      <div style="padding: 40px; text-align: center; width: 100%;">
+        <p>No recommendations found. Try listening to more music on Spotify!</p>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Optional: Group by Topics if you have that data -->
+  <div class="topic-section-title subtitle-green">Movies by Topics</div>
+  
+  <div class="section-header">
+    <div class="topic-title">Action & Adventure</div>
+    <div class="show-all">Show all →</div>
+  </div>
+  <div class="scroll-row">
+    {% for movie in recommendations[:4] %}
+    <div class="card">
+      <img src="{{ movie.poster if movie.poster else 'https://placehold.co/300x400' }}" 
+           alt="{{ movie.title }}" />
+      <div class="movie-title">{{ movie.title }}</div>
     </div>
-  `;
-
-  return container;
-}
-
-const topicsContainer = document.getElementById('topicsContainer');
-topics.forEach(topic => topicsContainer.appendChild(createTopic(topic)));
-</script>
+    {% endfor %}
+  </div>
 
 </body>
 </html>

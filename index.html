@@ -85,6 +85,8 @@
       border-radius: 20px;
       border: none;
       cursor: pointer;
+      opacity: 0.5;
+      cursor: not-allowed;
     }
 
     .footer {
@@ -93,72 +95,21 @@
       opacity: 0.7;
     }
 
-    /* Loading overlay */
-    #loadingOverlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.8);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      color: white;
-      font-size: 24px;
-      z-index: 999;
+    .disabled-notice {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #ff6b6b;
     }
   </style>
-
-  <script>
-    window.onload = function () {
-      // Auto-fill email if "Remember me" was used
-      const savedEmail = localStorage.getItem("savedEmail");
-      if (savedEmail) {
-        document.getElementById("email").value = savedEmail;
-        document.getElementById("rememberMe").checked = true;
-      }
-    };
-
-    function handleLogin(event) {
-      event.preventDefault();
-
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value.trim();
-      const remember = document.getElementById("rememberMe").checked;
-
-      if (email === "" || password === "") {
-        alert("Please enter both email and password.");
-        return;
-      }
-
-      // Save email if Remember Me is checked
-      if (remember) {
-        localStorage.setItem("savedEmail", email);
-      } else {
-        localStorage.removeItem("savedEmail");
-      }
-
-      // Show loading animation
-      document.getElementById("loadingOverlay").style.display = "flex";
-
-      // Redirect after 1 second
-      setTimeout(() => {
-        window.location.href = "spottestmainpage.html";
-      }, 1000);
-    }
-  </script>
 </head>
 
 <body>
-  <div id="loadingOverlay">Logging in...</div>
-
   <div class="card">
     <div class="logo">COMPANY NAME</div>
     <div class="subtitle">Get personalized movie recommendations based on your Spotify activity</div>
 
-    <!-- Updated Spotify login button -->
-    <a href="https://accounts.spotify.com/en/login?continue=https%3A%2F%2Fopen.spotify.com%2F" class="spotify-btn">
+    <!-- Updated Spotify login button - connects to Flask backend -->
+    <a href="http://localhost:5000/login" class="spotify-btn">
       Continue with Spotify
     </a>
 
@@ -166,18 +117,19 @@
     Or with email
     <hr class="divider" />
 
-    <form onsubmit="handleLogin(event)">
-      <input id="email" type="email" placeholder="Email or username" required />
-      <input id="password" type="password" placeholder="Password" required />
+    <form onsubmit="return false;">
+      <input id="email" type="email" placeholder="Email or username" disabled />
+      <input id="password" type="password" placeholder="Password" disabled />
 
       <div class="options">
-        <label>
-          <input type="checkbox" id="rememberMe" /> Keep me signed in
+        <label style="opacity: 0.5;">
+          <input type="checkbox" id="rememberMe" disabled /> Keep me signed in
         </label>
-        <a href="#" style="color: #1db954">Forgot password?</a>
+        <a href="#" style="color: #1db954; opacity: 0.5; pointer-events: none;">Forgot password?</a>
       </div>
 
-      <button type="submit" class="login-btn">Login</button>
+      <button type="button" class="login-btn" disabled>Login</button>
+      <div class="disabled-notice">Email login is currently disabled. Please use Spotify login.</div>
     </form>
 
     <div class="footer">
