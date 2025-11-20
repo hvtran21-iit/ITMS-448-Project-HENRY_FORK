@@ -9,7 +9,7 @@ load_dotenv(dotenv_path=env_path)
 
 class TMDBClient:
     BASE_URL = "https://api.themoviedb.org/3"
-
+# retrieve API key from .env and check validity
     def __init__(self):
         self.api_key = os.getenv("TMDB_API_KEY")
         if not self.api_key:
@@ -23,7 +23,7 @@ class TMDBClient:
         response = requests.get(url, params=params)
         response.raise_for_status()
         return response.json()
-
+#pull genres 
     def get_genre_id(self, genre_name):
         data = self._get("/genre/movie/list")
         genres = data.get("genres", [])
@@ -31,7 +31,7 @@ class TMDBClient:
             if genre_name.lower() in g["name"].lower():
                 return g["id"]
         return None
-
+#pull movies by genre 
     def search_movies_by_genre(self, genre_name, limit=10):
         genre_id = self.get_genre_id(genre_name)
         if not genre_id:
