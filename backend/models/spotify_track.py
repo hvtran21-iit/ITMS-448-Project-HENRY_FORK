@@ -4,6 +4,8 @@ class SpotifyTrack:
     def __init__(self, name, artist, album_image=None, spotify_url=None):
         self.name = name
         self.artist = artist
+        self.artist_id = artist_id
+        self.genres = genres or []
 
 
 #  convert Spotify API track JSON into a SpotifyTrack object.
@@ -18,10 +20,14 @@ class SpotifyTrack:
         
         # Get artist name
         artists = data.get("artists", [])
-        artist = artists[0]["name"] if artists else None
+        artist= artists[0]["name"] if artists else None
+        artist_id = artists[0]["id"] if artists else None
 
         if not name or not artist:
             return None
 
 				# construct and return SpotifyTrack instance
-        return cls(name=name, artist=artist)
+        return cls(name=name, 
+                   artist=artist, 
+                   artist_id=artist_id
+                   )

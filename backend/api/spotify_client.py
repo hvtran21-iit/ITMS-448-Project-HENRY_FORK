@@ -48,3 +48,16 @@ class SpotifyClient:
         response = requests.get(url, headers=headers)
         response.raise_for_status()
         return response.json()
+    
+# retrieves a list of genres for the artist (CSV ONLY)
+    def get_artist_genres(self, artist_id, access_token):
+        
+        url = f"{self.API_BASE}/artists/{artist_id}"
+        headers = {"Authorization": f"Bearer {access_token}"}
+        res = requests.get(url, headers=headers)
+        
+        if res.status_code != 200:
+            return []
+
+        data = res.json()
+        return data.get("genres", [])
