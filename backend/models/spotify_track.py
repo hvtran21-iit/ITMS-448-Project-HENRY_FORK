@@ -1,7 +1,7 @@
 # models/spotify_track.py
 
 class SpotifyTrack:
-    def __init__(self, name, artist, album_image=None, spotify_url=None):
+    def __init__(self, name, artist, artist_id=None, album_image=None, spotify_url=None, genres=None):
         self.name = name
         self.artist = artist
         self.artist_id = artist_id
@@ -29,5 +29,6 @@ class SpotifyTrack:
 				# construct and return SpotifyTrack instance
         return cls(name=name, 
                    artist=artist, 
-                   artist_id=artist_id
+                   artist_id=artist_id,
+                   genres=[]
                    )

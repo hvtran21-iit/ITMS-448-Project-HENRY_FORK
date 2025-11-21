@@ -5,6 +5,7 @@ from api.omdb_client import OMDBClient
 from api.tmdb_client import TMDBClient
 from models.spotify_track import SpotifyTrack
 from models.movie_recs import MovieRecommendation
+from services.csv_writer import append_row
 
 
 class RecommendationService:
@@ -40,7 +41,8 @@ class RecommendationService:
                 "year": omdb.get("Year"),
                 "genre": omdb.get("Genre"),
                 "plot": omdb.get("Plot"),
-                "poster": omdb.get("Poster")
+                "poster": omdb.get("Poster"),
+                "director": omdb.get("Director")
             }
         return None
 
@@ -57,7 +59,9 @@ class RecommendationService:
             "year": movie.get("release_date", "")[:4],
             "genre": ", ".join([g["name"] for g in movie.get("genres", [])]) if movie.get("genres") else "",
             "plot": movie.get("overview"),
-            "poster": poster_url
+            "poster": poster_url,
+            "director": ""
+
         }
 
     #try OMDB first, then TMDB if OMDB fails
@@ -74,6 +78,11 @@ class RecommendationService:
         td_debug = {} 
 
         for track in tracks:
+            #fetch genres from Spotify 
+            if track.artist_id:
+                track.genres = self.spotify.get_artist_genres(track.artist_id, access_token)
+
+            #Get TasteDive movie matches
             td_results = self._get_tastedive_movies(track)
             td_debug[track.name] = [entry.get("name") for entry in td_results if entry.get("name")]
 
@@ -89,5 +98,21 @@ class RecommendationService:
                         details=movie_details
                     )
                     recommendations.append(rec)
+                    
+                    movie_details = movie_details or {}
+                    #THIS IS THE CSV LOGGING (one row per recommendation)
+                    row = {
+                    "song_title": track.name,
+                    "song_artist": track.artist,
+                    "song_genre": ", ".join(track.genres) if track.genres else "",
+
+                    "movie_title": movie_details.get("title", ""),
+                    "movie_director": movie_details.get("director", ""),  # only from OMDB
+                    "movie_genre": movie_details.get("genre", ""),
+                    "movie_year": movie_details.get("year", ""),
+                    "movie_plot": movie_details.get("plot", "")
+                    }
+
+                    append_row(row)
 
         return recommendations, td_debug
